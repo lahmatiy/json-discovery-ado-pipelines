@@ -1,0 +1,74 @@
+.view-timeline {
+  position: relative;
+  padding: 16px 0;
+}
+
+.view-timeline .time-ruler {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  z-index: -1;
+}
+.view-timeline .time-ruler .line {
+  position: absolute;
+  border-left: 1px solid #ccc;
+  top: 0;
+  left: calc(100% * var(--offset));
+  bottom: 0;
+}
+.discovery-root-darkmode .view-timeline .stage {
+  border-color: #666;
+}
+.view-timeline .time-ruler .line::before,
+.view-timeline .time-ruler .line::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 3px;
+  font-size: 10px;
+  line-height: 10px;
+}
+.view-timeline .time-ruler .line::before {
+  top: 3px;
+}
+.view-timeline .time-ruler .line::after {
+  bottom: 3px;
+}
+
+.view-timeline .stage {
+  /* margin: 1px 0; */
+  background-color: rgba(205, 205, 205, 0.15);
+}
+.discovery-root-darkmode .view-timeline .stage {
+  background-color: rgba(205, 205, 205, 0.05);
+}
+.view-timeline:not(.show__titles) .stage__title {
+  display: none;
+}
+.view-timeline .stage__title {
+  font-size: 10px;
+  line-height: 12px;
+  padding: 2px 4px 4px;
+  opacity: 0.65;
+}
+
+.view-timeline .job {
+  position: relative;
+  height: 4px;
+  margin: 1px 0;
+}
+.view-timeline .job .body {
+  content: "";
+  position: absolute;
+  left: calc(100% * var(--offset));
+  width: calc(100% * var(--width));
+  height: 100%;
+  background-color: #54a6eea6;
+}
+.view-timeline .job .task {
+  content: "";
+  position: absolute;
+  left: calc(100% * var(--offset));
+  width: calc(100% * var(--width));
+  height: 100%;
+  background-color: #c25f5f;
+}

@@ -1,6 +1,8 @@
 @import '@discoveryjs/discovery/src/lib.css';
+@import './pages/default.css';
 @import './pages/raw.css';
 @import './pages/settings.css';
+@import './views/index.css';
 @import './flash-messages.css';
 
 :host {

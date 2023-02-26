@@ -2,6 +2,8 @@ import { Widget, router } from '@discoveryjs/discovery';
 import flashMessages from './flash-messages';
 import navbar from './navbar';
 import * as pages from './pages';
+import * as views from './views';
+import prepare from './prepare/main.js';
 
 /**
  * Discovery initialization
@@ -26,21 +28,9 @@ export function initDiscovery(options, data) {
     discovery.apply(flashMessages);
     discovery.apply(navbar);
     discovery.apply(pages);
+    discovery.apply(views);
 
-    discovery.setPrepare((_, { addQueryHelpers }) => {
-        addQueryHelpers({
-            weight(current, prec = 1) {
-                const unit = ['bytes', 'kB', 'MB', 'GB'];
-
-                while (current > 1000) {
-                    current = current / 1000;
-                    unit.shift();
-                }
-
-                return current.toFixed(prec).replace(/\.0+$/, '') + unit[0];
-            }
-        });
-    });
+    discovery.setPrepare(prepare);
 
     return discovery.setDataProgress(
         data,

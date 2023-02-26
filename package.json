@@ -1,8 +1,7 @@
 {
-  "name": "jsondiscovery",
-  "version": "1.13.3",
-  "description": "Browser (Chrome, Firefox) extension for JSON discovery",
-  "author": "exsdis@gmail.com",
+  "name": "jsondiscovery-ado-pipelines",
+  "version": "0.1.2",
+  "description": "Browser (Chrome, Edge, Firefox) extension for ADO pipeline discovery",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -11,7 +10,7 @@
     "build": "NODE_ENV=production node ./scripts/build.js && node ./scripts/zip.js"
   },
   "devDependencies": {
-    "@discoveryjs/discovery": "1.0.0-beta.68",
+    "@discoveryjs/discovery": "1.0.0-beta.70",
     "@discoveryjs/json-ext": "^0.5.7",
     "css-tree": "^2.1.0",
     "esbuild": "^0.14.49",

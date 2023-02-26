@@ -1,55 +1,127 @@
-import { copyToClipboardButton } from '../copy-to-clipboard';
-import { downloadAsFileButton } from '../download-as-file';
+import { createPathNodeGetter } from '../prepare/tree.js';
+// import { nextMonth, labelMonth } from './utils.js';
 
-export default host => {
-    host.page.define('default', {
-        view: 'context',
-        modifiers: {
+const indicatorList = {
+    view: 'inline-list',
+    item: 'indicator{ value: "text-numeric:value" }',
+    data: `.($type; {
+      label: title,
+      value: query.query(#.data, #) |
+          $type = "asis" ? $ :
+          $type = "percent" ? percent() :
+          size(),
+      href: href or pageLink('report', { query, view, noedit: view.bool(), title })
+    })`
+};
+
+export default discovery => {
+    discovery.on('data', () => {
+        discovery.context.pipelineNode = createPathNodeGetter({
+            rootRef: null,
+            getParentRef: entity => entity?.parentId || null
+        });
+    });
+
+    discovery.page.define('default', [
+        {
             view: 'page-header',
-            data: () => host.raw,
             content: [
-                copyToClipboardButton,
-                downloadAsFileButton,
-                {
-                    view: 'block',
-                    content: [
-                        {
-                            view: 'button',
-                            className: 'collapse-all',
-                            content: 'text:"-"',
-                            onClick(el, data, { onChange }) {
-                                onChange(1, 'expandLevel');
-                            },
-                            postRender(el, config, data, context) {
-                                context.onChange = config.onChange;
-                                el.title = 'Collapse all';
-                                el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">' +
-                                    '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 8zm7-8a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 4.293V.5A.5.5 0 0 1 8 0zm-.5 11.707-1.146 1.147a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 11.707V15.5a.5.5 0 0 1-1 0v-3.793z"/>' +
-                                    '</svg>';
-                            }
-                        },
-                        {
-                            view: 'button',
-                            className: 'expand-all',
-                            content: 'text:"+"',
-                            onClick(el, data, { onChange }) {
-                                onChange(100, 'expandLevel');
-                            },
-                            postRender(el, config, data, context) {
-                                context.onChange = config.onChange;
-                                el.title = 'Expand all';
-                                el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">' +
-                                    '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 8zM7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10z"/>' +
-                                    '</svg>';
-                            }
-                        }
-                    ]
-                }
+                'h1:"ADO pipeline viewer prototype"'
             ]
         },
-        content: {
-            view: 'struct',
-            expanded: '=+(#.expandLevel or #.settings.expandLevel)'
+
+        {
+            view: 'section',
+            header: [],
+            content: {
+                view: 'context',
+                data: [
+                    {
+                        title: 'Run duration',
+                        type: 'asis',
+                        query: 'stages.max(=>finishTime) - stages.min(=>startTime) | duration()'
+                    },
+                    {
+                        title: 'All jobs duration',
+                        type: 'asis',
+                        query: 'jobs.sum(=>duration) | duration()'
+                    },
+                    { title: 'Tasks', query: 'tasks' },
+                    { title: 'Jobs', query: 'jobs' },
+                    { title: 'Stages', query: 'stages' }
+                ],
+                content: indicatorList
+            }
+        },
+
+        'h2:"Jobs timeline"',
+        {
+            view: 'block',
+            className: 'timeline-box',
+            content: {
+                view: 'context',
+                modifiers: [
+                    {
+                        view: 'content-filter',
+                        name: 'groupNameFilter',
+                        data: `
+                            tasks.group(=>groupName).({
+                                groupName: key,
+                                tasks: value,
+                                duration: value.sum(=>duration)
+                            }).sort(duration desc)
+                        `,
+                        content: {
+                            view: 'menu',
+                            name: 'groupName',
+                            data: '.[groupName ~= #.groupNameFilter]',
+                            limit: false,
+                            item: ['badge:duration.duration()', 'text:groupName']
+                        }
+                    }
+                ],
+                content: 'timeline:stages'
+            }
+        },
+
+        'h2:"Task aggregation"',
+        {
+            view: 'table',
+            data: `
+                $totalDuration: tasks.sum(=>duration);
+
+                tasks.group(=>groupName)
+                    .($duration: value.sum(=>duration); $parentDur: value.parent.sum(=>duration); {
+                    task: key,
+                    $duration,
+                    count: value.size(),
+                    avgDuration: $duration / value.size(),
+                    $totalDuration,
+                    parentFraction: ($duration / $parentDur).percent(),
+                    tasks: value
+                    })
+                    .sort(duration desc)
+            `,
+            cols: {
+                totalDuration: false,
+                duration: {
+                    sorting: 'duration desc',
+                    content: 'value-fraction:{ value: duration, format: => duration(), total: totalDuration }'
+                },
+                avgDuration: {
+                    className: 'number',
+                    sorting: 'avgDuration desc',
+                    content: 'text-numeric:avgDuration.duration()'
+                }
+            }
+        },
+
+        'h2:"Pipeline tree"',
+        {
+            view: 'tree',
+            data: 'stages',
+            expanded: 2,
+            item: ['text:name + " "', 'badge:duration.duration()']
         }
-    });
+    ]);
 };

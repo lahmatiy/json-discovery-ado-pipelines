@@ -1,9 +1,9 @@
 {
     "version": null,
-    "name": "JsonDiscovery",
-    "short_name": "JsonDiscovery",
-    "description": "Browser extension that changes the way you're viewing JSON",
-    "author": "exdis",
+    "name": "JsonDiscovery ADO pipelines edition",
+    "short_name": "JsonDiscovery ADO pipelines edition",
+    "description": "Browser extension that changes the way you're viewing JSON with flavor of ADO pipelines",
+    "author": "romandvornov@microsoft.com",
     "manifest_version": 2,
     "icons": {
         "16": "icons/16.png",
@@ -11,8 +11,11 @@
         "128": "icons/128.png"
     },
     "permissions": [
-        "<all_urls>",
         "storage"
+    ],
+    "host_permissions": [
+        "*://*.visualstudio.com/*/_build/results",
+        "*://*.visualstudio.com/*/_apis/build/builds/*/Timeline"
     ],
     "content_scripts": [{
         "js": ["init.js"],

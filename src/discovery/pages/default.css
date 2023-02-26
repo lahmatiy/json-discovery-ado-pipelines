@@ -1,0 +1,71 @@
+/* temporary fix */
+.view-table {
+    line-height: unset;
+}
+
+.page-default .git-info {
+    margin-top: -4px;
+    font-size: 13px;
+    opacity: 0.65;
+}
+
+.page-default .view-button .view-text-numeric {
+    opacity: 0.65;
+    margin-left: 0.5ex;
+}
+
+.page-default .view-indicator {
+    width: auto;
+    min-width: 150px;
+    box-sizing: content-box;
+}
+.page-default .view-indicator .value {
+    font-family: Helvetica;
+    font-weight: 100;
+    padding: 0 1ex;
+    white-space: nowrap;
+}
+
+.page-default .chart-toggle {
+    position: relative;
+    top: -15px;
+}
+.page-default .chart-toggle .view-toggle {
+    font-size: 11px;
+}
+
+.page-default .files-stat-tables {
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 20px;
+}
+.page-default
+    .files-stat-tables
+    table:last-child
+    .view-table-cell:first-child
+    .view-link {
+    display: inline-block;
+    overflow: hidden;
+    max-width: 290px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+.page-default .timeline-box {
+    position: relative;
+    --sidebar-width: 300px;
+}
+.page-default .timeline-box .view-content-filter {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: var(--sidebar-width);
+    top: 0;
+    bottom: 0;
+    font-size: 12px;
+}
+.page-default .timeline-box .view-timeline {
+    margin-left: calc(var(--sidebar-width) + 10px);
+}

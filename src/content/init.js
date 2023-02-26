@@ -218,6 +218,40 @@ async function checkLoaded(settings) {
     }
 }
 
+// add button on pipeline's page
+const locationMatch = location.href.match(/^(https:\/\/.+\.visualstudio.com\/[^\/]+)\/_build\/results/);
+if (locationMatch) {
+    const params = new URLSearchParams(location.search);
+    const btnEl = document.createElement('a');
+    const labelEl = btnEl.appendChild(document.createElement('span'));
+    let attempts = 10;
+
+    btnEl.className = 'bolt-header-command-item-button bolt-button enabled bolt-focus-treatment';
+    btnEl.setAttribute('aria-roledescription', 'button');
+    btnEl.setAttribute('data-is-focusable', 'true');
+    btnEl.setAttribute('role', 'menuitem');
+    btnEl.setAttribute('tabindex', '0');
+    btnEl.setAttribute('type', 'button');
+    btnEl.setAttribute('href', `${locationMatch[1]}/_apis/build/builds/${params.get('buildId')}/Timeline`);
+    btnEl.setAttribute('target', '_blank');
+    labelEl.className = 'bolt-button-text body-m';
+    labelEl.textContent = 'Pipeline discovery';
+
+    window.addEventListener('load', function installButton() {
+        const insertPointEl = document.getElementById('__bolt-run-pipeline-command');
+
+        // console.log('try install', attempts);
+        if (insertPointEl) {
+            // console.log('installation');
+            insertPointEl.before(btnEl);
+        } else if (attempts > 0) {
+            attempts--;
+            // console.log('try again');
+            setTimeout(installButton, 1000);
+        }
+    }, true);
+}
+
 window.addEventListener('DOMContentLoaded', () => loaded = true, false);
 getSettings()
     .then(checkLoaded)

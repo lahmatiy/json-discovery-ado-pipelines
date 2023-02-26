@@ -1,0 +1,25 @@
+.view-value-fraction {
+  max-width: 18ex;
+  display: flex;
+  text-align: right;
+  align-items: baseline;
+  gap: 0.5ex;
+}
+.view-tree-leaf .view-value-fraction {
+  display: inline-flex;
+}
+
+.view-value-fraction .num-delim {
+  padding-left: 0.12em;
+}
+
+.view-value-fraction > .value {
+  flex: 1;
+}
+
+.view-value-fraction > .fraction {
+  width: 3em;
+  padding: 2px 4px;
+  opacity: 0.65;
+  font-size: 83%;
+}
