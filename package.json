@@ -1,6 +1,6 @@
 {
   "name": "jsondiscovery-ado-pipelines",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Browser (Chrome, Edge, Firefox) extension for ADO pipeline discovery",
   "license": "MIT",
   "private": true,
