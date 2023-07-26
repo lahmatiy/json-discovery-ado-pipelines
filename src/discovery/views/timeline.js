@@ -10,10 +10,11 @@ export default discovery => {
         const startTime = Math.min(...stages.map(stage => stage.startTime));
         const finishTime = Math.max(...stages.map(stage => stage.finishTime));
         const duration = finishTime - startTime;
+        const durationMin = Math.floor(duration / (60 * 1000));
 
         // time ruler
         const timeRulerEl = el.appendChild(document.createElement('div'));
-        const timeRulerStep = 10 * 60 * 1000;
+        const timeRulerStep = (durationMin <= 50 ? Math.ceil(durationMin / 10) : 10) * 60 * 1000;
 
         timeRulerEl.className = 'time-ruler';
 
@@ -62,8 +63,49 @@ export default discovery => {
 
                 this.tooltip(
                     bodyEl,
-                    ['text:name', 'html:"<br>"', 'text:duration.duration()'],
-                    job,
+                    [
+                        {
+                            view: 'block',
+                            className: 'timeline-tooltip-header',
+                            content: [
+                                'h4:job.name',
+                                'badge:job | { text: result, color: result = "succeeded" ? "#1b5f1e" : result = "in progress" ? "#6a6a19" : result = "canceled" ? "#943c3c" : undefined }'
+                            ]
+                        },
+                        'text:`Duration: ${job.duration.duration()} (${(100 * job.duration / duration).toFixed(2)}%)`',
+                        'html:"<br>"',
+                        'text:`Start at ${job.startTime - startTime | $ ? duration() : "00:00"} (${(100 * (job.startTime - startTime) / duration).toFixed(2)}%)`',
+                        'html:"<br>"',
+                        'text:`Worker: ${job.workerName or "–"}`',
+                        {
+                            view: 'context',
+                            data: `
+                                $top: job.children.sort(duration desc)[:5];
+                                $rest: job.children - $top
+                                    | size()
+                                        ? {
+                                            name: \`Other (\${size()} \${size() | $ < 2 ? 'task' : 'tasks'})\`,
+                                            duration: reduce(=>$$ + (duration or 0), 0)
+                                        }
+                                        : [];
+                                
+                                $top + $rest | .({ ..., totalDuration: @.job.duration })
+                            `,
+                            whenData: true,
+                            content: [
+                                'html:"<hr>"',
+                                'text:"Longest tasks:"',
+                                {
+                                    view: 'ol',
+                                    item: [
+                                        'text: name + "\xa0\xa0"',
+                                        'badge:`${duration.duration()} (${(100 * duration / totalDuration).toFixed(2)}%)`'
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    { job, duration, startTime },
                     context
                 );
                 bodyEl.classList.add('body');
@@ -93,8 +135,25 @@ export default discovery => {
                         );
                         this.tooltip(
                             taskEl,
-                            ['text:name', 'html:"<br>"', 'text:duration.duration()'],
-                            task,
+                            [
+                                {
+                                    view: 'block',
+                                    className: 'timeline-tooltip-header',
+                                    content: [
+                                        'h4:task.name',
+                                        'badge:task | { text: result, color: result = "succeeded" ? "#1b5f1e" : result = "in progress" ? "#6a6a19" : result = "canceled" ? "#943c3c" : undefined }'
+                                    ]
+                                },
+                                'text:`Duration: ${task.duration.duration()} (${(100 * task.duration / duration).toFixed(2)}%)`',
+                                'html:"<br>"',
+                                'text:`Start at ${task.startTime - startTime | $ ? duration() : "00:00"} (${(100 * (task.startTime - startTime) / duration).toFixed(2)}%)`',
+                                'html:"<br>"',
+                                'text:`Worker: ${task.workerName or "–"}`',
+                                'html:"<hr>"',
+                                'md:`${(100 * task.duration / job.duration).toFixed(2)}% of **${job.name}**`',
+                                'text:`Offset from job start ${task.startTime - job.startTime | $ ? duration() : "00:00"} (${(100 * (task.startTime - job.startTime) / duration).toFixed(2)}%)`'
+                            ],
+                            { task, job, duration, startTime },
                             context
                         );
                     }

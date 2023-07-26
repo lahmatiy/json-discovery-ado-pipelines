@@ -1,5 +1,7 @@
 /* eslint-env node */
 
+const now = Date.now();
+
 function date(value) {
     if (!value) {
         return value;
@@ -9,6 +11,7 @@ function date(value) {
 }
 
 function cleanupEntry(entry) {
+    const startTime = date(entry.startTime) || date(entry.finishTime);
     const result = {
         // previousAttempts: entry.previousAttempts,
         id: entry.id,
@@ -17,17 +20,18 @@ function cleanupEntry(entry) {
         name: entry.name,
         refName: entry.refName,
         logId: entry.logId,
-        startTime: date(entry.startTime) || date(entry.finishTime),
-        finishTime: date(entry.finishTime),
+        startTime: startTime,
+        finishTime: startTime ? date(entry.finishTime) || now : null,
         // percentComplete: entry.percentComplete,
         state: entry.state,
-        result: entry.result,
+        result: entry.result || (entry.state === 'inProgress' ? 'in progress' : null),
         // order: entry.order,
         // originalOrder: entry.originalOrder,
-        workerName: entry.workerName,
+        workerName: entry.workerName?.replace(/\s+\d+$/, ''),
         message: entry.message,
         // stateData: entry.stateData,
-        issues: entry.issues?.length ? entry.issues : undefined
+        issues: entry.issues?.length ? entry.issues : undefined,
+        __entry: entry
         // attempt: entry.attempt,
     };
 
@@ -46,10 +50,10 @@ export function cleanupPipelineData(rawData) {
     const data = {
         __originalData: rawData,
         // jobQueueData: rawData.jobQueueData,
-        stages: cleanupEntryList(rawData.records, 'Stage'),
-        phases: cleanupEntryList(rawData.records, 'Phase'),
-        jobs: cleanupEntryList(rawData.records, 'Job'),
-        tasks: cleanupEntryList(rawData.records, 'Task'),
+        stages: cleanupEntryList(rawData.records, 'Stage', now),
+        phases: cleanupEntryList(rawData.records, 'Phase', now),
+        jobs: cleanupEntryList(rawData.records, 'Job', now),
+        tasks: cleanupEntryList(rawData.records, 'Task', now),
         buildId: 'rawData.buildId',
         buildNumber: 'rawData.buildNumber',
         result: 'rawData.result',

@@ -14,6 +14,8 @@ const indicatorList = {
     })`
 };
 
+let lastSelected = null;
+
 export default discovery => {
     discovery.on('data', () => {
         discovery.context.pipelineNode = createPathNodeGetter({
@@ -76,11 +78,47 @@ export default discovery => {
                             name: 'groupName',
                             data: '.[groupName ~= #.groupNameFilter]',
                             limit: false,
-                            item: ['badge:duration.duration()', 'text:groupName']
+                            item: [
+                                {
+                                    view: 'block',
+                                    className: 'main-content',
+                                    content: [
+                                        'badge:duration.duration()',
+                                        'text:groupName'
+                                    ]
+                                },
+                                {
+                                    view: 'block',
+                                    when: 'tasks.size() > 1',
+                                    content: {
+                                        view: 'badge',
+                                        content: 'text:`× ${tasks.size()}`',
+                                        tooltip: [
+                                            'text:`${tasks.size()} task runs`',
+                                            'html:"<br>"',
+                                            'text:"Workers:"',
+                                            'ol:tasks.workerName.sort($ ascN)'
+                                        ]
+                                    }
+                                }
+                            ],
+                            itemConfig: {
+                                postRender(el, _, { groupName }) {
+                                    el.dataset.groupName = groupName;
+                                }
+                            }
                         }
                     }
                 ],
-                content: 'timeline:stages'
+                content: [
+                    'timeline:stages',
+                    function(el, config, data, { groupName }) {
+                        lastSelected?.classList.remove('selected');
+                        lastSelected = [...discovery.dom.container.querySelectorAll('.timeline-box .view-menu-item')]
+                            .find(el => el.dataset.groupName === groupName.groupName);
+                        lastSelected?.classList.add('selected');
+                    }
+                ]
             }
         },
 

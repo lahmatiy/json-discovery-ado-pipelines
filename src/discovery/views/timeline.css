@@ -72,3 +72,13 @@
   height: 100%;
   background-color: #c25f5f;
 }
+
+.timeline-tooltip-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.timeline-tooltip-header > :first-child {
+  flex: 1;
+  margin: 0 0 .25em;
+}

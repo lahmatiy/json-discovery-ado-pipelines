@@ -66,6 +66,16 @@
     bottom: 0;
     font-size: 12px;
 }
+.page-default .timeline-box .view-menu-item {
+    display: flex;
+}
+.page-default .timeline-box .view-menu-item .main-content {
+    flex: 1;
+}
+.page-default .timeline-box .view-menu-item .view-badge {
+    padding: 4px 6px;
+}
 .page-default .timeline-box .view-timeline {
     margin-left: calc(var(--sidebar-width) + 10px);
+    min-height: 150px;
 }
