@@ -219,7 +219,7 @@ async function checkLoaded(settings) {
 }
 
 // add button on pipeline's page
-const locationMatch = location.href.match(/^(https:\/\/.+\.visualstudio.com\/[^\/]+)\/_build\/results/);
+const locationMatch = location.href.match(/^(https:\/\/.+\.visualstudio.com\/(?:[^\/]+\/)+)_build\/results/);
 if (locationMatch) {
     const params = new URLSearchParams(location.search);
     const btnEl = document.createElement('a');
@@ -238,7 +238,8 @@ if (locationMatch) {
     labelEl.textContent = 'Pipeline discovery';
 
     window.addEventListener('load', function installButton() {
-        const insertPointEl = document.getElementById('__bolt-run-pipeline-command');
+        const insertPointEl = document.getElementById('__bolt-run-pipeline-command') ||
+            document.getElementById('__bolt-nbr-cancel');
 
         // console.log('try install', attempts);
         if (insertPointEl) {
